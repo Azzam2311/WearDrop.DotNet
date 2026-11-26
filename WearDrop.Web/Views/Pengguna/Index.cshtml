@@ -1,0 +1,102 @@
+@model IEnumerable<WearDrop.Web.Models.AdminUser>
+@{
+    ViewData["Title"] = "Kelola Pengguna";
+    ViewData["PageTitle"] = "Kelola Pengguna / Staf Internal";
+    string? selectedRole = ViewBag.SelectedRole as string;
+    string RoleBadge(string r) => r switch
+    {
+        "admin" => "bg-espresso text-white",
+        "kasir" => "bg-slate text-white",
+        _ => "bg-amber-100 text-amber-800 border border-amber-200"
+    };
+}
+
+<div class="space-y-6">
+    <!-- 3 Kartu Ringkasan -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-stone-500">Total Admin</p>
+                <p class="text-3xl font-extrabold text-espresso mt-1">@ViewBag.TotalAdmin</p>
+            </div>
+            <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-espresso text-white">Admin</span>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-stone-500">Total Kasir</p>
+                <p class="text-3xl font-extrabold text-espresso mt-1">@ViewBag.TotalKasir</p>
+            </div>
+            <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-slate text-white">Kasir</span>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-stone-500">Total Karyawan</p>
+                <p class="text-3xl font-extrabold text-espresso mt-1">@ViewBag.TotalKaryawan</p>
+            </div>
+            <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">Karyawan</span>
+        </div>
+    </div>
+
+    <!-- Filter & Tambah -->
+    <div class="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-sm flex flex-wrap items-center justify-between gap-3">
+        <form method="get" asp-action="Index" class="flex flex-wrap flex-1 gap-2">
+            <input type="text" name="search" value="@ViewBag.Search" placeholder="Cari nama / email staf..."
+                   class="flex-1 min-w-[200px] px-4 py-2.5 rounded-xl border border-stone-200 bg-cream/40 text-sm focus:outline-none focus:border-slate" />
+            <select name="role" class="px-3 py-2.5 rounded-xl border border-stone-200 bg-cream/40 text-sm">
+                <option value="">Semua Jabatan</option>
+                <option value="admin" selected="@(selectedRole == "admin")">Admin</option>
+                <option value="kasir" selected="@(selectedRole == "kasir")">Kasir</option>
+                <option value="karyawan" selected="@(selectedRole == "karyawan")">Karyawan</option>
+            </select>
+            <button type="submit" class="px-4 py-2.5 rounded-xl bg-slate hover:bg-slate-600 text-white text-xs font-bold">Cari</button>
+            <a asp-action="Index" class="px-4 py-2.5 rounded-xl bg-stone-100 text-stone-700 text-xs font-bold">Reset</a>
+        </form>
+        <a asp-action="Create" class="px-4 py-2.5 rounded-xl bg-espresso hover:bg-espresso-soft text-white text-xs font-bold">+ Tambah Pengguna</a>
+    </div>
+
+    <!-- Tabel Staf -->
+    <div class="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-x-auto">
+        <table class="w-full text-left text-sm">
+            <thead>
+                <tr class="bg-cream/60 border-b border-stone-200/80 text-xs font-semibold text-stone-500 uppercase tracking-wider">
+                    <th class="py-3.5 px-5">Nama Lengkap</th>
+                    <th class="py-3.5 px-5">Email</th>
+                    <th class="py-3.5 px-5">Jabatan</th>
+                    <th class="py-3.5 px-5">Tanggal Dibuat</th>
+                    <th class="py-3.5 px-5 text-right">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-stone-100">
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="5" class="py-12 text-center text-stone-400">Belum ada pengguna internal.</td></tr>
+                }
+                else
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr class="hover:bg-cream/30">
+                            <td class="py-4 px-5 font-bold text-espresso">@item.Nama</td>
+                            <td class="py-4 px-5 text-stone-600">@item.Email</td>
+                            <td class="py-4 px-5">
+                                <span class="px-2.5 py-1 rounded-md text-xs font-bold uppercase @RoleBadge(item.Role)">@item.Role</span>
+                            </td>
+                            <td class="py-4 px-5 text-stone-500">@(item.CreatedAt?.ToString("dd MMM yyyy") ?? "-")</td>
+                            <td class="py-4 px-5 text-right">
+                                <div class="inline-flex gap-2">
+                                    <a asp-action="Edit" asp-route-id="@item.IdAdmin"
+                                       class="px-3 py-1.5 rounded-xl bg-slate hover:bg-slate-600 text-white text-xs font-bold">Edit</a>
+                                    <form asp-action="Delete" asp-route-id="@item.IdAdmin" method="post"
+                                          onsubmit="return confirm('Hapus akun staf ini?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold">Hapus</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

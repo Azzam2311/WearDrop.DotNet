@@ -1,0 +1,67 @@
+@model WearDrop.Web.Models.Produk
+@{
+    ViewData["Title"] = "Tambah Produk";
+    ViewData["PageTitle"] = "Tambah Produk Baru";
+}
+
+<div class="max-w-2xl bg-white p-6 rounded-2xl border border-stone-200/80 shadow-sm">
+    <form asp-action="Create" method="post" enctype="multipart/form-data" class="space-y-4">
+        @Html.AntiForgeryToken()
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="sm:col-span-2">
+                <label asp-for="NamaProduk" class="block text-xs font-bold uppercase text-stone-600 mb-1.5"></label>
+                <input asp-for="NamaProduk" placeholder="Contoh: WearDrop Oversize Tee"
+                       class="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-cream/40 text-sm" />
+                <span asp-validation-for="NamaProduk"></span>
+            </div>
+
+            <div>
+                <label asp-for="IdKategori" class="block text-xs font-bold uppercase text-stone-600 mb-1.5"></label>
+                <select asp-for="IdKategori" asp-items="ViewBag.KategoriList"
+                        class="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-cream/40 text-sm">
+                    <option value="">-- Pilih Kategori --</option>
+                </select>
+                <span asp-validation-for="IdKategori"></span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label asp-for="Harga" class="block text-xs font-bold uppercase text-stone-600 mb-1.5"></label>
+                    <input asp-for="Harga" type="number" step="1" min="0"
+                           class="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-cream/40 text-sm" />
+                    <span asp-validation-for="Harga"></span>
+                </div>
+                <div>
+                    <label asp-for="Stok" class="block text-xs font-bold uppercase text-stone-600 mb-1.5"></label>
+                    <input asp-for="Stok" type="number" min="0"
+                           class="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-cream/40 text-sm" />
+                    <span asp-validation-for="Stok"></span>
+                </div>
+            </div>
+
+            <div class="sm:col-span-2">
+                <label asp-for="Deskripsi" class="block text-xs font-bold uppercase text-stone-600 mb-1.5"></label>
+                <textarea asp-for="Deskripsi" rows="3" placeholder="Deskripsi bahan, ukuran, dan potongan..."
+                          class="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-cream/40 text-sm"></textarea>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase text-stone-600 mb-1.5">Upload File Gambar (Opsional)</label>
+                <input type="file" name="fileGambar" accept="image/*"
+                       class="w-full text-xs text-stone-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-slate file:text-white file:font-bold" />
+            </div>
+
+            <div>
+                <label asp-for="Gambar" class="block text-xs font-bold uppercase text-stone-600 mb-1.5">Atau URL / Path Gambar</label>
+                <input asp-for="Gambar" placeholder="produk/kaos.jpg atau https://..."
+                       class="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-cream/40 text-sm" />
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-stone-100">
+            <a asp-action="Index" class="px-4 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-xs font-bold text-stone-700">Batal</a>
+            <button type="submit" class="px-5 py-2.5 rounded-xl bg-espresso hover:bg-espresso-soft text-white text-xs font-bold">Simpan Produk</button>
+        </div>
+    </form>
+</div>

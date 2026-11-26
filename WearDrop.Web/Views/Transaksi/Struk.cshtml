@@ -1,0 +1,63 @@
+@model WearDrop.Web.Models.Transaksi
+@{
+    Layout = null;
+    decimal subtotalItem = Model.DetailTransaksis.Sum(d => d.Subtotal);
+    decimal diskon = Math.Max(0m, subtotalItem - Model.TotalPembayaran);
+}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8" />
+    <title>Struk @Model.KodeTransaksi - WearDrop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-stone-100 py-8 px-4 font-sans text-stone-900">
+    <div class="max-w-md mx-auto bg-white p-6 rounded-2xl shadow-md border border-stone-200">
+        <div class="text-center border-b border-dashed border-stone-300 pb-4">
+            <h1 class="text-xl font-extrabold tracking-wider">WEARDROP</h1>
+            <p class="text-xs text-stone-500">Bukti Pembayaran Resmi &bull; .NET Edition</p>
+            <p class="text-xs font-mono font-bold mt-2">@Model.KodeTransaksi</p>
+            <p class="text-xs text-stone-500">@Model.TanggalTransaksi.ToString("dd MMM yyyy HH:mm")</p>
+        </div>
+
+        <div class="py-3 border-b border-dashed border-stone-300 text-xs space-y-1">
+            <div class="flex justify-between"><span>Pelanggan:</span><strong>@(Model.Pelanggan?.Nama ?? "-")</strong></div>
+            <div class="flex justify-between"><span>Metode Bayar:</span><strong>@(Model.Pembayaran?.MetodePembayaran ?? "-")</strong></div>
+            <div class="flex justify-between"><span>Status Bayar:</span><strong class="uppercase">@(Model.Pembayaran?.StatusPembayaran ?? "-")</strong></div>
+            @if (!string.IsNullOrWhiteSpace(Model.Pengiriman?.NoResi))
+            {
+                <div class="flex justify-between"><span>No. Resi:</span><strong class="font-mono">@Model.Pengiriman.NoResi</strong></div>
+            }
+        </div>
+
+        <div class="py-3 border-b border-dashed border-stone-300 space-y-2 text-xs">
+            @foreach (var d in Model.DetailTransaksis)
+            {
+                <div class="flex justify-between">
+                    <div>
+                        <div class="font-bold">@(d.Produk?.NamaProduk ?? $"Produk #{d.IdProduk}")</div>
+                        <div class="text-stone-500">@d.Jumlah x Rp @d.Harga.ToString("N0")</div>
+                    </div>
+                    <div class="font-bold">Rp @d.Subtotal.ToString("N0")</div>
+                </div>
+            }
+        </div>
+
+        <div class="py-3 text-xs space-y-1">
+            <div class="flex justify-between"><span>Subtotal</span><span>Rp @subtotalItem.ToString("N0")</span></div>
+            @if (diskon > 0)
+            {
+                <div class="flex justify-between text-emerald-700"><span>Diskon Promo</span><span>- Rp @diskon.ToString("N0")</span></div>
+            }
+            <div class="flex justify-between text-sm font-extrabold pt-2 border-t border-stone-200">
+                <span>TOTAL</span>
+                <span>Rp @Model.TotalPembayaran.ToString("N0")</span>
+            </div>
+        </div>
+
+        <div class="mt-4 text-center print:hidden">
+            <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-stone-900 text-white text-xs font-bold">Cetak / Simpan PDF</button>
+        </div>
+    </div>
+</body>
+</html>

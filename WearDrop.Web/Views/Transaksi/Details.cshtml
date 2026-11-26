@@ -1,0 +1,168 @@
+@model WearDrop.Web.Models.Transaksi
+@{
+    ViewData["Title"] = $"Detail {Model.KodeTransaksi}";
+    ViewData["PageTitle"] = $"Detail Transaksi {Model.KodeTransaksi}";
+    decimal subtotalItem = Model.DetailTransaksis.Sum(d => d.Subtotal);
+    decimal diskon = Math.Max(0m, subtotalItem - Model.TotalPembayaran);
+}
+
+<div class="space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <a asp-action="Index" class="text-xs font-bold text-slate hover:underline">&larr; Kembali ke Daftar Transaksi</a>
+        <div class="flex gap-2">
+            <a asp-action="Struk" asp-route-id="@Model.IdTransaksi" target="_blank"
+               class="px-4 py-2 rounded-xl bg-espresso hover:bg-espresso-soft text-white text-xs font-bold">Cetak Struk</a>
+            <form asp-action="Delete" asp-route-id="@Model.IdTransaksi" method="post"
+                  onsubmit="return confirm('Hapus transaksi ini?');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold">Hapus</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Item & Pelanggan -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-stone-100 flex justify-between items-center">
+                    <h3 class="font-bold text-sm text-espresso">Daftar Produk Dibeli</h3>
+                    <span class="text-xs text-stone-500">@Model.TanggalTransaksi.ToString("dd MMM yyyy HH:mm")</span>
+                </div>
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="bg-cream/60 border-b border-stone-200/80 text-xs font-semibold text-stone-500 uppercase">
+                            <th class="py-3 px-5">Produk</th>
+                            <th class="py-3 px-5">Harga</th>
+                            <th class="py-3 px-5">Qty</th>
+                            <th class="py-3 px-5 text-right">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-stone-100">
+                        @foreach (var d in Model.DetailTransaksis)
+                        {
+                            <tr>
+                                <td class="py-3.5 px-5 font-semibold">@(d.Produk?.NamaProduk ?? $"Produk #{d.IdProduk}")</td>
+                                <td class="py-3.5 px-5">Rp @d.Harga.ToString("N0")</td>
+                                <td class="py-3.5 px-5">@d.Jumlah</td>
+                                <td class="py-3.5 px-5 text-right font-bold">Rp @d.Subtotal.ToString("N0")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <div class="p-5 bg-cream/40 border-t border-stone-100 space-y-1 text-sm">
+                    <div class="flex justify-between text-stone-600">
+                        <span>Subtotal Item</span>
+                        <span>Rp @subtotalItem.ToString("N0")</span>
+                    </div>
+                    @if (diskon > 0)
+                    {
+                        <div class="flex justify-between text-emerald-700 font-semibold">
+                            <span>Potongan Promo @(Model.Promo != null ? $"({Model.Promo.KodePromo})" : "")</span>
+                            <span>- Rp @diskon.ToString("N0")</span>
+                        </div>
+                    }
+                    <div class="flex justify-between text-base font-extrabold text-espresso pt-2 border-t border-stone-200">
+                        <span>Total Pembayaran</span>
+                        <span>Rp @Model.TotalPembayaran.ToString("N0")</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-sm">
+                <h3 class="font-bold text-sm text-espresso mb-3">Informasi Pelanggan &amp; Tujuan</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                    <div>
+                        <p class="text-xs text-stone-400 uppercase font-bold">Nama</p>
+                        <p class="font-semibold">@(Model.Pelanggan?.Nama ?? "-")</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-stone-400 uppercase font-bold">Kontak</p>
+                        <p>@(Model.Pelanggan?.Email ?? "-") &bull; @(Model.Pelanggan?.NoHp ?? "-")</p>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <p class="text-xs text-stone-400 uppercase font-bold">Alamat Pengiriman</p>
+                        <p>@(Model.Pelanggan?.Alamat ?? "Belum diisi")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel Kontrol Pembayaran, Status & Pengiriman -->
+        <div class="space-y-6">
+            <!-- Verifikasi Pembayaran -->
+            <div class="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-sm space-y-3">
+                <h3 class="font-bold text-sm text-espresso">1. Verifikasi Pembayaran</h3>
+                <div class="text-xs space-y-1 text-stone-600">
+                    <p>Metode: <strong class="text-espresso">@(Model.Pembayaran?.MetodePembayaran ?? "-")</strong></p>
+                    <p>Status: <strong class="uppercase text-espresso">@(Model.Pembayaran?.StatusPembayaran ?? "-")</strong></p>
+                </div>
+                @if (Model.Pembayaran != null && Model.Pembayaran.StatusPembayaran != "lunas")
+                {
+                    <div class="flex gap-2 pt-2">
+                        <form asp-action="VerifikasiPembayaran" asp-route-id="@Model.IdTransaksi" method="post" class="flex-1">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="aksi" value="lunas" />
+                            <button type="submit" class="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">
+                                Konfirmasi LUNAS (&amp; Potong Stok)
+                            </button>
+                        </form>
+                        <form asp-action="VerifikasiPembayaran" asp-route-id="@Model.IdTransaksi" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="aksi" value="ditolak" />
+                            <button type="submit" class="px-3 py-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold">
+                                Tolak
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+
+            <!-- Update Status Pesanan -->
+            <div class="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-sm space-y-3">
+                <h3 class="font-bold text-sm text-espresso">2. Status Pesanan</h3>
+                <form asp-action="UpdateStatus" asp-route-id="@Model.IdTransaksi" method="post" class="space-y-3">
+                    @Html.AntiForgeryToken()
+                    <select name="statusTransaksi" class="w-full px-3 py-2 rounded-xl border border-stone-200 bg-cream/40 text-sm">
+                        @foreach (var s in new[] { "pending", "dikonfirmasi", "diproses", "dikirim", "selesai", "dibatalkan" })
+                        {
+                            <option value="@s" selected="@(Model.StatusTransaksi == s)">@s.ToUpperInvariant()</option>
+                        }
+                    </select>
+                    <button type="submit" class="w-full py-2 rounded-xl bg-slate hover:bg-slate-600 text-white text-xs font-bold">
+                        Perbarui Status Pesanan
+                    </button>
+                </form>
+            </div>
+
+            <!-- Update Pengiriman & Resi -->
+            <div class="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-sm space-y-3">
+                <h3 class="font-bold text-sm text-espresso">3. Pengiriman &amp; Nomor Resi</h3>
+                <form asp-action="UpdatePengiriman" asp-route-id="@Model.IdTransaksi" method="post" class="space-y-3">
+                    @Html.AntiForgeryToken()
+                    <div>
+                        <label class="block text-xs font-bold text-stone-500 mb-1">Kurir</label>
+                        <input type="text" name="metodePengiriman" value="@(Model.Pengiriman?.MetodePengiriman ?? "JNE Reguler")" required
+                               class="w-full px-3 py-2 rounded-xl border border-stone-200 bg-cream/40 text-sm" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-500 mb-1">Nomor Resi</label>
+                        <input type="text" name="noResi" value="@(Model.Pengiriman?.NoResi)" placeholder="Contoh: JNE882910021"
+                               class="w-full px-3 py-2 rounded-xl border border-stone-200 bg-cream/40 text-sm font-mono" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-500 mb-1">Status Pengiriman</label>
+                        <select name="statusPengiriman" class="w-full px-3 py-2 rounded-xl border border-stone-200 bg-cream/40 text-sm">
+                            @foreach (var sp in new[] { "menunggu_konfirmasi", "dikemas", "dikirim", "diterima" })
+                            {
+                                <option value="@sp" selected="@(Model.Pengiriman?.StatusPengiriman == sp)">@sp.Replace('_', ' ').ToUpperInvariant()</option>
+                            }
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full py-2 rounded-xl bg-espresso hover:bg-espresso-soft text-white text-xs font-bold">
+                        Simpan Pengiriman
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,76 @@
+@model IEnumerable<WearDrop.Web.Models.Keranjang>
+@{
+    ViewData["Title"] = "Cek Keranjang";
+    ViewData["PageTitle"] = "Monitoring & CRUD Keranjang Pelanggan";
+    var pelanggans = ViewBag.Pelanggans as List<WearDrop.Web.Models.Pelanggan> ?? new();
+    var produks = ViewBag.Produks as List<WearDrop.Web.Models.Produk> ?? new();
+}
+
+<div class="space-y-6">
+    <!-- Tambah Item Keranjang Cepat -->
+    <div class="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-sm">
+        <h3 class="text-xs font-bold uppercase text-stone-500 mb-3">Tambah Item ke Keranjang Pelanggan</h3>
+        <form asp-action="Create" method="post" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            @Html.AntiForgeryToken()
+            <select name="idPelanggan" required class="px-3 py-2.5 rounded-xl border border-stone-200 bg-cream/40 text-sm">
+                <option value="">-- Pilih Pelanggan --</option>
+                @foreach (var c in pelanggans)
+                {
+                    <option value="@c.IdPelanggan">@c.Nama</option>
+                }
+            </select>
+            <select name="idProduk" required class="px-3 py-2.5 rounded-xl border border-stone-200 bg-cream/40 text-sm sm:col-span-2">
+                <option value="">-- Pilih Produk --</option>
+                @foreach (var p in produks)
+                {
+                    <option value="@p.IdProduk">@p.NamaProduk (Rp @p.Harga.ToString("N0"))</option>
+                }
+            </select>
+            <div class="flex gap-2">
+                <input type="number" name="jumlah" value="1" min="1" required
+                       class="w-20 px-3 py-2.5 rounded-xl border border-stone-200 bg-cream/40 text-sm" />
+                <button type="submit" class="flex-1 px-4 py-2.5 rounded-xl bg-espresso hover:bg-espresso-soft text-white text-xs font-bold">+ Tambah</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-x-auto">
+        <table class="w-full text-left text-sm">
+            <thead>
+                <tr class="bg-cream/60 border-b border-stone-200/80 text-xs font-semibold text-stone-500 uppercase tracking-wider">
+                    <th class="py-3.5 px-5">Pelanggan</th>
+                    <th class="py-3.5 px-5">Produk</th>
+                    <th class="py-3.5 px-5">Jumlah</th>
+                    <th class="py-3.5 px-5">Estimasi Subtotal</th>
+                    <th class="py-3.5 px-5 text-right">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-stone-100">
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="5" class="py-12 text-center text-stone-400">Keranjang seluruh pelanggan kosong.</td></tr>
+                }
+                else
+                {
+                    @foreach (var k in Model)
+                    {
+                        var harga = k.Produk?.Harga ?? 0m;
+                        <tr class="hover:bg-cream/30">
+                            <td class="py-4 px-5 font-bold text-espresso">@(k.Pelanggan?.Nama ?? "-")</td>
+                            <td class="py-4 px-5">@(k.Produk?.NamaProduk ?? "-")</td>
+                            <td class="py-4 px-5 font-semibold">@k.Jumlah pcs</td>
+                            <td class="py-4 px-5 font-bold">Rp @((harga * k.Jumlah).ToString("N0"))</td>
+                            <td class="py-4 px-5 text-right">
+                                <form asp-action="Delete" asp-route-id="@k.IdKeranjang" method="post"
+                                      onsubmit="return confirm('Hapus item dari keranjang?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold">Hapus</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,135 @@
+﻿@model WearDrop.Web.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    ViewData["PageTitle"] = "Ringkasan Operasional WearDrop";
+}
+
+@if (!Model.DatabaseConnected)
+{
+    <div class="bg-amber-50 border border-amber-300 rounded-2xl p-6 mb-6 shadow-sm">
+        <h3 class="text-base font-bold text-amber-900">Koneksi MySQL Belum Aktif</h3>
+        <p class="text-sm text-amber-800 mt-1">
+            Pastikan layanan <strong>MySQL (Laragon)</strong> sedang berjalan pada <code>127.0.0.1:3306</code> dengan nama database <code>weardrop</code>.
+        </p>
+        <p class="text-xs text-amber-700 mt-2 font-mono bg-amber-100/70 p-2.5 rounded-xl">Detail: @Model.DatabaseError</p>
+    </div>
+}
+
+<div class="space-y-6">
+    <!-- Baris KPI Utama -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-wider text-stone-400">Total Pendapatan (Lunas)</p>
+            <p class="text-2xl font-extrabold text-espresso mt-2">Rp @Model.TotalPendapatan.ToString("N0")</p>
+            <p class="text-xs text-stone-500 mt-1">Dari @Model.TotalTransaksi transaksi tercatat</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-wider text-stone-400">Produk &amp; Kategori</p>
+            <p class="text-2xl font-extrabold text-espresso mt-2">@Model.TotalProduk <span class="text-sm font-semibold text-stone-500">Produk</span></p>
+            <p class="text-xs text-stone-500 mt-1">@Model.TotalKategori kategori &bull; @Model.ProdukHabis stok habis</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-wider text-stone-400">Menunggu Verifikasi</p>
+            <p class="text-2xl font-extrabold text-slate mt-2">@Model.MenungguVerifikasi <span class="text-sm font-semibold text-stone-500">Pembayaran</span></p>
+            <p class="text-xs text-stone-500 mt-1">@Model.PromoAktif kode promo aktif hari ini</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-wider text-stone-400">Pengguna Terdaftar</p>
+            <p class="text-2xl font-extrabold text-espresso mt-2">@Model.TotalPelanggan <span class="text-sm font-semibold text-stone-500">Pelanggan</span></p>
+            <p class="text-xs text-stone-500 mt-1">@Model.TotalStaf akun staf internal</p>
+        </div>
+    </div>
+
+    <!-- Pintasan Cepat CRUD -->
+    <div class="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-sm flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h2 class="text-sm font-bold text-espresso">Pintasan Modul CRUD</h2>
+            <p class="text-xs text-stone-500">Kelola seluruh entitas database MySQL WearDrop secara langsung melalui ASP.NET Core MVC.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <a asp-controller="Produk" asp-action="Create" class="px-4 py-2 rounded-xl bg-espresso hover:bg-espresso-soft text-white text-xs font-bold">+ Tambah Produk</a>
+            <a asp-controller="Kategori" asp-action="Create" class="px-4 py-2 rounded-xl bg-slate hover:bg-slate-600 text-white text-xs font-bold">+ Tambah Kategori</a>
+            <a asp-controller="Promo" asp-action="Create" class="px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-espresso text-xs font-bold">+ Buat Promo</a>
+            <a asp-controller="Transaksi" asp-action="Create" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">+ Transaksi Baru</a>
+            <a asp-controller="Pengguna" asp-action="Create" class="px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-espresso text-xs font-bold">+ Tambah Staf</a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Transaksi Terbaru -->
+        <div class="lg:col-span-2 bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-stone-100 flex items-center justify-between">
+                <h3 class="font-bold text-sm text-espresso">5 Transaksi Terbaru</h3>
+                <a asp-controller="Transaksi" asp-action="Index" class="text-xs font-bold text-slate hover:underline">Lihat Semua &rarr;</a>
+            </div>
+            <table class="w-full text-left text-sm">
+                <thead>
+                    <tr class="bg-cream/60 border-b border-stone-200/80 text-xs font-semibold text-stone-500 uppercase">
+                        <th class="py-3 px-4">Kode</th>
+                        <th class="py-3 px-4">Pelanggan</th>
+                        <th class="py-3 px-4">Total</th>
+                        <th class="py-3 px-4">Pembayaran</th>
+                        <th class="py-3 px-4 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-stone-100">
+                    @if (Model.TransaksiTerbaru.Count == 0)
+                    {
+                        <tr><td colspan="5" class="py-8 text-center text-stone-400">Belum ada transaksi.</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var t in Model.TransaksiTerbaru)
+                        {
+                            <tr class="hover:bg-cream/30">
+                                <td class="py-3 px-4 font-bold text-xs">@t.KodeTransaksi</td>
+                                <td class="py-3 px-4">@(t.Pelanggan?.Nama ?? "-")</td>
+                                <td class="py-3 px-4 font-semibold">Rp @t.TotalPembayaran.ToString("N0")</td>
+                                <td class="py-3 px-4">
+                                    <span class="px-2.5 py-1 rounded-md text-xs font-bold @(t.Pembayaran?.StatusPembayaran == "lunas" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800")">
+                                        @(t.Pembayaran?.StatusPembayaran ?? "belum_ada")
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-right">
+                                    <a asp-controller="Transaksi" asp-action="Details" asp-route-id="@t.IdTransaksi" class="text-xs font-bold text-slate hover:underline">Detail</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Stok Kritis -->
+        <div class="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-stone-100 flex items-center justify-between">
+                <h3 class="font-bold text-sm text-espresso">Peringatan Stok (&le; 5)</h3>
+                <a asp-controller="Produk" asp-action="Index" asp-route-filterStok="kritis" class="text-xs font-bold text-slate hover:underline">Kelola &rarr;</a>
+            </div>
+            <div class="divide-y divide-stone-100">
+                @if (Model.StokKritis.Count == 0)
+                {
+                    <div class="p-8 text-center text-sm text-stone-400">Seluruh stok produk aman.</div>
+                }
+                else
+                {
+                    @foreach (var p in Model.StokKritis)
+                    {
+                        <div class="p-4 flex items-center justify-between gap-3">
+                            <div>
+                                <p class="text-sm font-bold text-espresso">@p.NamaProduk</p>
+                                <p class="text-xs text-stone-500">@(p.Kategori?.NamaKategori ?? "-")</p>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-lg text-xs font-bold @(p.Stok <= 0 ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-800")">
+                                Sisa @p.Stok
+                            </span>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>

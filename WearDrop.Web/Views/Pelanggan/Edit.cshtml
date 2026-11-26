@@ -1,0 +1,50 @@
+@model WearDrop.Web.Models.Pelanggan
+@{
+    ViewData["Title"] = "Edit Pelanggan";
+    ViewData["PageTitle"] = $"Edit Pelanggan #{Model.IdPelanggan}";
+}
+
+<div class="max-w-xl bg-white p-6 rounded-2xl border border-stone-200/80 shadow-sm">
+    <form asp-action="Edit" asp-route-id="@Model.IdPelanggan" method="post" class="space-y-4">
+        @Html.AntiForgeryToken()
+
+        <div>
+            <label asp-for="Nama" class="block text-xs font-bold uppercase text-stone-600 mb-1.5"></label>
+            <input asp-for="Nama"
+                   class="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-cream/40 text-sm" />
+            <span asp-validation-for="Nama"></span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+                <label asp-for="Email" class="block text-xs font-bold uppercase text-stone-600 mb-1.5"></label>
+                <input asp-for="Email" type="email"
+                       class="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-cream/40 text-sm" />
+                <span asp-validation-for="Email"></span>
+            </div>
+            <div>
+                <label asp-for="NoHp" class="block text-xs font-bold uppercase text-stone-600 mb-1.5"></label>
+                <input asp-for="NoHp"
+                       class="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-cream/40 text-sm" />
+                <span asp-validation-for="NoHp"></span>
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold uppercase text-stone-600 mb-1.5">Reset Password (Opsional)</label>
+            <input type="password" name="newPassword" placeholder="Kosongkan jika password tidak diubah"
+                   class="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-cream/40 text-sm" />
+        </div>
+
+        <div>
+            <label asp-for="Alamat" class="block text-xs font-bold uppercase text-stone-600 mb-1.5"></label>
+            <textarea asp-for="Alamat" rows="3"
+                      class="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-cream/40 text-sm"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-stone-100">
+            <a asp-action="Index" class="px-4 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-xs font-bold text-stone-700">Batal</a>
+            <button type="submit" class="px-5 py-2.5 rounded-xl bg-espresso hover:bg-espresso-soft text-white text-xs font-bold">Perbarui Pelanggan</button>
+        </div>
+    </form>
+</div>

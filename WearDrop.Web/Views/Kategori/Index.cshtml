@@ -1,0 +1,61 @@
+@model IEnumerable<WearDrop.Web.Models.Kategori>
+@{
+    ViewData["Title"] = "Kelola Kategori";
+    ViewData["PageTitle"] = "Kelola Kategori Pakaian";
+}
+
+<div class="space-y-6">
+    <div class="bg-white p-5 rounded-2xl border border-stone-200/80 shadow-sm flex flex-wrap items-center justify-between gap-3">
+        <form method="get" asp-action="Index" class="flex flex-1 min-w-[240px] gap-2">
+            <input type="text" name="search" value="@ViewBag.Search" placeholder="Cari nama kategori..."
+                   class="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 bg-cream/40 text-sm focus:outline-none focus:border-slate" />
+            <button type="submit" class="px-4 py-2.5 rounded-xl bg-slate hover:bg-slate-600 text-white text-xs font-bold">Cari</button>
+            @if (!string.IsNullOrEmpty(ViewBag.Search as string))
+            {
+                <a asp-action="Index" class="px-4 py-2.5 rounded-xl bg-stone-100 text-stone-700 text-xs font-bold">Reset</a>
+            }
+        </form>
+        <a asp-action="Create" class="px-4 py-2.5 rounded-xl bg-espresso hover:bg-espresso-soft text-white text-xs font-bold">+ Kategori Baru</a>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-hidden">
+        <table class="w-full text-left text-sm">
+            <thead>
+                <tr class="bg-cream/60 border-b border-stone-200/80 text-xs font-semibold text-stone-500 uppercase tracking-wider">
+                    <th class="py-3.5 px-5">ID</th>
+                    <th class="py-3.5 px-5">Nama Kategori</th>
+                    <th class="py-3.5 px-5">Jumlah Produk</th>
+                    <th class="py-3.5 px-5 text-right">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-stone-100">
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="4" class="py-12 text-center text-stone-400">Belum ada data kategori.</td></tr>
+                }
+                else
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr class="hover:bg-cream/30">
+                            <td class="py-4 px-5 text-stone-400">#@item.IdKategori</td>
+                            <td class="py-4 px-5 font-bold text-espresso">@item.NamaKategori</td>
+                            <td class="py-4 px-5">@item.Produks.Count produk</td>
+                            <td class="py-4 px-5 text-right">
+                                <div class="inline-flex gap-2">
+                                    <a asp-action="Edit" asp-route-id="@item.IdKategori"
+                                       class="px-3 py-1.5 rounded-xl bg-slate hover:bg-slate-600 text-white text-xs font-bold">Edit</a>
+                                    <form asp-action="Delete" asp-route-id="@item.IdKategori" method="post"
+                                          onsubmit="return confirm('Hapus kategori ini?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold">Hapus</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
